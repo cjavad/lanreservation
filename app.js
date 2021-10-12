@@ -3,7 +3,7 @@ const bodyParser = require('body-parser')
 
 const JsonDB = require('node-json-db').JsonDB;
 const Config = require('node-json-db/dist/lib/JsonDBConfig').Config;
-const db = new JsonDB(new Config("db", true, false, '/'));
+const db = new JsonDB(new Config("db", true, true, '/'));
 
 
 const app = express();
@@ -49,7 +49,7 @@ app.post("/get_access", (req, res) => {
 
     const id = ID();
 
-    db.push(`/access/${id}`, {
+    db.push(`/${id}`, {
         id: id,
         name: req.body.name,
         letter: "",
@@ -57,19 +57,28 @@ app.post("/get_access", (req, res) => {
         createdAt: Date.now()
     });
 
-    res.send({
-        id: id
-    });
+    res.send(`
+        <html>
+            <p>${req.body.name}</p>
+            <a href="https://lanreservation.javad.ninja/?id=${id}">https://lanreservation.javad.ninja/?id=${id}</a>
+        </html>
+    `);
 });
 
 app.post("/update_seating", (req, res) => {
-    if (req.body.id === undefined || req.body.letter === undefined || req.body.seat === undefined && !db.exists(`/access/${req.body.id}`)) {
+    if (req.body.id === undefined || req.body.letter === undefined || req.body.seat === undefined) {
         res.status(400);
         res.end();
     }
 
-    const data = db.getData('/access');
-    const accessPath = `/access/${req.body.id}`;
+    if (!db.exists(`/${req.body.id}`)) {
+        res.status(404);
+        res.end("Nt.");
+        return;
+    }
+
+    const data = db.getData('/');
+    const accessPath = `/${req.body.id}`;
 
     for (const key in data) {
         if (data[key].seat === req.body.seat && data[key].letter === req.body.letter) {
@@ -90,7 +99,7 @@ app.post("/update_seating", (req, res) => {
 });
 
 app.get('/get_all_seatings', (req, res) => {
-    const data = db.getData('/access');
+    const data = db.getData('/');
 
     const seatings = [];
 
@@ -133,8 +142,8 @@ app.get('/get_all_seatings', (req, res) => {
 });
 
 app.get('/get_seating', (req, res) => {
-    if (!db.exists(`/access/${req.query.id}`)) return;
-    res.send(db.getData(`/access/${req.query.id}`));
+    if (!db.exists(`/${req.query.id}`)) return;
+    res.send(db.getData(`/${req.query.id}`));
 })
 
 app.listen(config.port, () => {
