@@ -96,7 +96,7 @@ app.post("/get_access", [
 });
 
 app.post("/update_seating",[
-    body('id').isLength(ID().length).custom(value => !db.exists(`/${value}`)).withMessage('ID is incorrect'),
+    body('id').custom(value => !db.exists(`/${value}`)).withMessage('ID is incorrect'),
     body('letter').isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
     body('seat').isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
 ], (req, res) => {
@@ -112,7 +112,7 @@ app.post("/update_seating",[
     for (const key in data) {
         if (data[key].seat === req.body.seat && data[key].letter === req.body.letter) {
             res.status(400);
-            res.end("Plads er allerede reseveret" + GO_BACK_HTML);
+            res.send("Plads er allerede reserveret" + GO_BACK_HTML);
             return;
         }
     }
@@ -123,7 +123,7 @@ app.post("/update_seating",[
     }, false);
 
     res.status(200);
-    res.end("OK - opdateret" + GO_BACK_HTML);
+    res.send("OK - opdateret" + GO_BACK_HTML);
     return;
 });
 
