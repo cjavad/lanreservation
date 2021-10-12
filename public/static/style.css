@@ -1,0 +1,39 @@
+html, body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Nobile', sans-serif;
+    font-weight: 200;
+    height: 100vh;
+    background-image: url("bg.jpg");
+    background-repeat: repeat;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Corben', Georgia, Times, serif;
+}
+
+p,
+div {
+    font-family: 'Nobile', Helvetica, Arial, sans-serif;
+}
+
+img {
+    max-width: 50%;
+}
+
+#takenseats {
+     overflow:scroll;
+     height: 400px;
+     text-align: left;
+     width: 50%;
+}
+
+#takenseats > p {
+    background-color: #000;
+}
