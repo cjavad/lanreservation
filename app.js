@@ -1,5 +1,8 @@
 const express = require('express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const { body, query, validationResult } = require('express-validator');
+const j2h = require('json2html');
+
 
 const JsonDB = require('node-json-db').JsonDB;
 const Config = require('node-json-db/dist/lib/JsonDBConfig').Config;
@@ -24,27 +27,34 @@ const ID = () => {
     return '_' + Math.random().toString(36).substr(2, 9);
 };
 
-app.get("/panel", (req, res) => {
-    if (req.query.username !== config.admin.username || req.query.password !== config.admin.password) {
-        res.send("You are not authorized to access this page");
-    } else {
-        res.sendFile(__dirname + '/public/submitAccess.html');
+const GO_BACK_HTML = `<a href="/">Go back</a>`;
+
+app.get("/panel", [
+    query('username').equals(config.username).withMessage('Username is incorrect'),
+    query('password').equals(config.password).withMessage('Password is incorrect'),
+], (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
     }
+
+    res.sendFile(__dirname + '/public/panel.html');
 });
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
-app.post("/get_access", (req, res) => {
-    if (req.body.username !== config.admin.username || req.body.password !== config.admin.password) {
-        res.status(403);
-        res.end("No auth");
-    }
+app.post("/get_access", [
+    body('username').equals(config.username).withMessage('Username is incorrect'),
+    body('password').equals(config.password).withMessage('Password is incorrect'),
+    body('name').notEmpty().withMessage('Name is required')
+], (req, res) => {
+    const errors = validationResult(req);
 
-    if (!req.body.name) {
-        res.status(400);
-        res.end("Husk at bruge navn");
+    if (!errors.isEmpty()) {
+        return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
     }
 
     const id = ID();
@@ -65,16 +75,15 @@ app.post("/get_access", (req, res) => {
     `);
 });
 
-app.post("/update_seating", (req, res) => {
-    if (req.body.id === undefined || req.body.letter === undefined || req.body.seat === undefined) {
-        res.status(400);
-        res.end();
-    }
+app.post("/update_seating",[
+    body('id').isLength(ID().length).custom(value => !db.exists(`/${value}`)).withMessage('ID is incorrect'),
+    body('letter').isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
+    body('seat').isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
+], (req, res) => {
+    const errors = validationResult(req);
 
-    if (!db.exists(`/${req.body.id}`)) {
-        res.status(404);
-        res.end("Nt.");
-        return;
+    if (!errors.isEmpty()) {
+        return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
     }
 
     const data = db.getData('/');
@@ -83,7 +92,7 @@ app.post("/update_seating", (req, res) => {
     for (const key in data) {
         if (data[key].seat === req.body.seat && data[key].letter === req.body.letter) {
             res.status(400);
-            res.end("Plads er allerede reseveret");
+            res.end("Plads er allerede reseveret" + GO_BACK_HTML);
             return;
         }
     }
@@ -94,7 +103,7 @@ app.post("/update_seating", (req, res) => {
     }, false);
 
     res.status(200);
-    res.end("OK - opdateret");
+    res.end("OK - opdateret" + GO_BACK_HTML);
     return;
 });
 
@@ -141,8 +150,11 @@ app.get('/get_all_seatings', (req, res) => {
     res.json(seatings);
 });
 
-app.get('/get_seating', (req, res) => {
-    if (!db.exists(`/${req.query.id}`)) return;
+app.get('/get_seating', query('id').isLength(9).custom(value => !db.exists(`/${value}`)), (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
+    }
     res.send(db.getData(`/${req.query.id}`));
 })
 
