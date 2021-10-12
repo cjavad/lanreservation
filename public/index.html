@@ -6,6 +6,55 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="http://fonts.googleapis.com/css?family=Corben:bold" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Nobile" rel="stylesheet" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <style>
+        html, body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Nobile', sans-serif;
+            font-weight: 200;
+            height: 100vh;
+            background-image: url("bg.jpg");
+            background-repeat: repeat;
+            margin: 0;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Corben', Georgia, Times, serif;
+        }
+
+        p,
+        div {
+            font-family: 'Nobile', Helvetica, Arial, sans-serif;
+        }
+
+        img {
+            max-width: 50%;
+        }
+
+        #takenseats {
+             overflow:scroll;
+             height: 400px;
+             text-align: left;
+             width: 50%;
+        }
+
+        #takenseats > p {
+            background-color: #000;
+        }
+
+    </style>
     <script src="lib.js"></script>
     <script>
         let taken_seats = [];
@@ -15,7 +64,7 @@
                 return /^\d{0,2}$/.test(value); // Allow digits using a RegExp and > 70
             });
 
-            function checkIfAvailable () {
+            function checkIfAvailable() {
                 const val = [document.getElementById("letter").value, document.getElementById("number").value];
                 for (let i = 0; i < taken_seats.length; i++) {
                     if (taken_seats[i][0] === val[0] && taken_seats[i][1] === val[1]) {
@@ -36,7 +85,9 @@
                         data.forEach(elm => {
                             if (elm.seat !== null) {
                                 taken_seats.push(elm);
-                                document.getElementById("takenseats").appendChild(document.createTextNode(elm.letter + elm.seat + " "));
+                                var para = document.createElement("p");
+                                para.innerHTML = elm.name + ": <b>" + elm.letter + elm.seat + "</b>";
+                                document.getElementById("takenseats").appendChild(para);
                             }
                         });
                     }
@@ -45,26 +96,47 @@
     </script>
 </head>
 
-<body>
-    <image src="floor1.png"></image>
-    <div id="takenseats">
-        <a><b>Taget pladser: </b></a>
+<body></body>
+<div class="d-flex p-3 bg-secondary text-white">
+    <image class="img-responsive" id="floor1" src="floor1.png"></image>
+    <image class="img-responsive" id="floor2" src="floor2.png"></image>
+</div>
+
+<div class="container d-flex p-3">
+    <div id="main" class="container">
+        <form action="/update_seating" method="POST">
+            <div class="form-group">
+                <label for="id">ID:</label>
+                <input type="text" id="id" name="id"><br><br>
+            </div>
+            <div class="form-group">
+                <div class="form-control">
+                    <label for="letter">Sæde bogstav</label>
+                    <select id="letter" name="letter">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="E">E</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label for="number">Sæde nummer:</label>
+                    <input type="text" id="seat" name="seat"><br><br>
+                </div>
+            </div>
+            <br>
+            <button type="submit" class="btn btn-info">Reserver Plads</button>
+        </form>
     </div>
-    <form action="/update_seating" method="POST">
-        <label for="id">ID:</label>
-        <input type="text" id="id" name="id"><br><br>
-        <label for="letter">Sæde bogstav</label>
-        <select id="letter" name="letter">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-            <option value="E">E</option>
-        </select>
-        <label for="number">Sæde nummer:</label>
-        <input type="text" id="seat" name="seat"><br><br>
-        <input type="submit" value="Submit">
-    </form>
+
+    
+    <div id="takenseats">
+        <p><b>Taget pladser: </b></p>
+
+    </div>
+</div>
+
 </body>
 
 </html>

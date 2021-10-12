@@ -96,6 +96,7 @@ app.get('/get_all_seatings', (req, res) => {
 
     for (const key in data) {
         seatings.push({
+            name: data[key].name,
             letter: data[key].letter,
             seat: data[key].seat
         });
