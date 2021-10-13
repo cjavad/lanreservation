@@ -60,7 +60,7 @@ app.get("/ticket", (req, res) => {
     res.sendFile(__dirname + '/public/ticket_verify.html');
 });
 
-app.get("/ticket/:id", param('id').custom(value => db.exists(`/${value}`)), async (req, res) => {
+app.get("/ticket/:id", param('id').notEmpty().custom(value => db.exists(`/${value}`)), async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -134,9 +134,9 @@ app.post("/get_access", [
 });
 
 app.post("/update_seating", [
-    body('id').custom(value => db.exists(`/${value}`)).withMessage('ID is incorrect'),
-    body('letter').isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
-    body('seat').isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
+    body('id').notEmpty().custom(value => db.exists(`/${value}`)).withMessage('ID is incorrect'),
+    body('letter').notEmpty().isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
+    body('seat').notEmpty().isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
 ], (req, res) => {
     const errors = validationResult(req);
 
@@ -208,7 +208,7 @@ app.get('/get_all_seatings', (req, res) => {
     res.json(seatings);
 });
 
-app.get('/get_seating', query('id').custom(value => db.exists(`/${value}`)), (req, res) => {
+app.get('/get_seating', query('id').notEmpty().custom(value => db.exists(`/${value}`)), (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
