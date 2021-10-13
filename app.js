@@ -72,7 +72,7 @@ app.get("/ticket/:id", param('id').custom(value => db.exists(`/${value}`)), asyn
         type: 'png',
         width: 1000,
         color: {
-            dark: "#" + getRandomColor(),
+            dark: getRandomColor(),
             light: '#FFF',
         },
     }
