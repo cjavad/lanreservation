@@ -96,7 +96,7 @@ app.post("/get_access", [
 });
 
 app.post("/update_seating",[
-    body('id').custom(value => !db.exists(`/${value}`)).withMessage('ID is incorrect'),
+    body('id').custom(value => db.exists(`/${value}`)).withMessage('ID is incorrect'),
     body('letter').isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
     body('seat').isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
 ], (req, res) => {
