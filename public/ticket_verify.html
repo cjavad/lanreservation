@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan billet</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            font-family: sans-serif;
+            padding: 0 10px;
+            height: 100%;
+            background: black;
+            margin: 0;
+        }
+
+        h1 {
+            color: white;
+            margin: 0;
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Confirm billet</h1>
+
+        <a id="btn-scan-qr">
+            <img src="https://uploads.sitepoint.com/wp-content/uploads/2017/07/1499401426qr_icon.svg">
+            <a />
+
+            <canvas hidden="" id="qr-canvas"></canvas>
+
+            <div id="qr-result" hidden="">
+                <b>Data:</b> <span id="outputData"></span>
+            </div>
+    </div>
+
+    <script src="/lib.js"></script>
+    <script src="/qrCodeScanner.js"></script>
+    <script>
+        var qrcode = window.qrcode;
+
+        var video = document.createElement("video");
+        var canvasElement = document.getElementById("qr-canvas");
+        var canvas = canvasElement.getContext("2d");
+
+        var qrResult = document.getElementById("qr-result");
+        var outputData = document.getElementById("outputData");
+        var btnScanQR = document.getElementById("btn-scan-qr");
+
+        var scanning = false;
+
+        qrcode.callback = (res) => {
+            if (res) {
+                getJSON('/get_seating?id=' + res,
+                    function (err, data) {
+                        if (err !== null) {
+                            outputData.innerText = 'Noget gik galt: ' + err;
+                        } else {
+                            outputData.innerText = JSON.stringify(data);
+                        }
+                    });
+
+                scanning = false;
+
+                video.srcObject.getTracks().forEach(track => {
+                    track.stop();
+                });
+
+                qrResult.hidden = false;
+                btnScanQR.hidden = false;
+                canvasElement.hidden = true;
+            }
+        };
+
+        btnScanQR.onclick = function () {
+            navigator.mediaDevices
+                .getUserMedia({ video: { facingMode: "environment" } })
+                .then(function (stream) {
+                    scanning = true;
+                    qrResult.hidden = true;
+                    btnScanQR.hidden = true;
+                    canvasElement.hidden = false;
+                    video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                    video.srcObject = stream;
+                    video.play();
+                    tick();
+                    scan();
+                });
+        }
+
+        function tick() {
+            canvasElement.height = video.videoHeight;
+            canvasElement.width = video.videoWidth;
+            canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+            scanning && requestAnimationFrame(tick);
+        }
+
+        function scan() {
+            try {
+                qrcode.decode();
+            } catch (e) {
+                setTimeout(scan, 300);
+            }
+        }
+    </script>
+</body>
+
+</html>

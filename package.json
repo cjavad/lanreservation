@@ -14,6 +14,7 @@
     "express": "^4.17.1",
     "express-validator": "^6.13.0",
     "json2html": "0.0.8",
-    "node-json-db": "^1.4.1"
+    "node-json-db": "^1.4.1",
+    "qrcode": "^1.4.4"
   }
 }

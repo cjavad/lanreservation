@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { body, query, validationResult } = require('express-validator');
+const { body, query, param, validationResult } = require('express-validator');
 const j2h = require('json2html');
+const QRCode = require('qrcode');
 
 
 const JsonDB = require('node-json-db').JsonDB;
@@ -44,6 +45,34 @@ app.get("/panel", [
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
+});
+
+app.get("/ticket", (req, res) => {
+    res.sendFile(__dirname + '/public/ticket_verify.html');
+});
+
+app.get("/ticket/:id", param('id').custom(value => db.exists(`/${value}`)), async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);
+    }
+
+    const opts = {
+        errorCorrectionLevel: 'H',
+        type: 'png',
+        width: 1000,
+        color: {
+            dark: '#208698',
+            light: '#FFF',
+        },
+    }
+
+    res.writeHead(200, {
+        'Content-Type': 'image/png'
+      });
+
+    const qrImage = QRCode.toFileStream(res, req.params.id, opts);
 });
 
 app.post("/get_access", [
@@ -95,7 +124,7 @@ app.post("/get_access", [
     `);
 });
 
-app.post("/update_seating",[
+app.post("/update_seating", [
     body('id').custom(value => db.exists(`/${value}`)).withMessage('ID is incorrect'),
     body('letter').isIn(['A', 'B', 'C', 'D', 'E', 'F', 'G']).withMessage('Letter is incorrect'),
     body('seat').isInt({ min: 1, max: 24 }).withMessage('Seat is incorrect')
@@ -170,7 +199,7 @@ app.get('/get_all_seatings', (req, res) => {
     res.json(seatings);
 });
 
-app.get('/get_seating', query('id').isLength(9).custom(value => !db.exists(`/${value}`)), (req, res) => {
+app.get('/get_seating', query('id').custom(value => db.exists(`/${value}`)), (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).send(j2h.render({ errors: errors.array() }) + GO_BACK_HTML);

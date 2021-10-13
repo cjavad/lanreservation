@@ -18,6 +18,12 @@
     <script>
         let taken_seats = [];
 
+        function loadTicket() {
+            var id = document.getElementById('id').value;
+            if (!id) return;
+            window.location.href = "/ticket/" + id;
+        }
+
         window.onload = function () {
             setInputFilter(document.getElementById("seat"), function (value) {
                 return /^\d{0,2}$/.test(value); // Allow digits using a RegExp and > 70
@@ -89,6 +95,8 @@
             <br>
             <button type="submit" class="btn btn-info">Reserver Plads</button>
         </form>
+        <button class="btn btn-primary" onclick="loadTicket()">Min Billet</button>
+
     </div>
 
     
