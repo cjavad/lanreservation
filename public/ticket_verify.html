@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan billet</title>
-    <link rel="stylesheet" href="/style.css">
     <style>
         html {
             height: 100%;
@@ -25,12 +24,52 @@
             margin: 0;
             padding: 15px;
         }
+
+
+        #qr {
+            background-color: #fff;
+        }
+
+        #takenseats>p {
+            background-color: #000;
+        }
+
+        #container {
+            text-align: center;
+            margin: 0;
+        }
+
+        #qr-canvas {
+            margin: auto;
+            width: calc(100% - 20px);
+            max-width: 400px;
+        }
+
+        #btn-scan-qr {
+            cursor: pointer;
+        }
+
+        #btn-scan-qr img {
+            height: 10em;
+            padding: 15px;
+            margin: 15px;
+            background: white;
+        }
+
+        #qr-result {
+            font-size: 1.2em;
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 700px;
+            color: black;
+            background-color: white;
+        }
     </style>
 </head>
 
 <body>
     <div id="container">
-        <h1>Confirm billet</h1>
+        <h1>Scan billet</h1>
 
         <a id="btn-scan-qr">
             <img src="https://uploads.sitepoint.com/wp-content/uploads/2017/07/1499401426qr_icon.svg">
@@ -39,7 +78,7 @@
             <canvas hidden="" id="qr-canvas"></canvas>
 
             <div id="qr-result" hidden="">
-                <b>Data:</b> <span id="outputData"></span>
+                <b>Billet:</b> <span id="outputData"></span>
             </div>
     </div>
 
@@ -65,7 +104,7 @@
                         if (err !== null) {
                             outputData.innerText = 'Noget gik galt: ' + err;
                         } else {
-                            outputData.innerText = JSON.stringify(data);
+                            outputData.innerText = data["name"] + ": " + data["letter"] + data["seat"];
                         }
                     });
 
