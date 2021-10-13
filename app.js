@@ -28,6 +28,15 @@ const ID = () => {
     return '_' + Math.random().toString(36).substr(2, 9);
 };
 
+const getRandomColor = () => {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
+}
+
 const GO_BACK_HTML = `<a href="/">Go back</a>`;
 
 app.get("/panel", [
@@ -63,7 +72,7 @@ app.get("/ticket/:id", param('id').custom(value => db.exists(`/${value}`)), asyn
         type: 'png',
         width: 1000,
         color: {
-            dark: '#208698',
+            dark: "#" + getRandomColor(),
             light: '#FFF',
         },
     }
